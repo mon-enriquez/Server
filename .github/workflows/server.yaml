@@ -41,4 +41,9 @@ jobs:
           aws-access-key-id: ${{ secrets.MONTSE_ACCESS_KEY}}
           aws-secret-access-key: ${{ secrets.MONTSE_SECRET_KEY }}
           aws-region: us-east-2
-          
+      
+      - name: Cargar imagen ECR
+        uses: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/n3j7o1e0
+        run: |
+          docker tag $IMAGE_NAME:latest public.ecr.aws/n3j7o1e0/montse_server:latest
+          docker push public.ecr.aws/n3j7o1e0/montse_server:latest
