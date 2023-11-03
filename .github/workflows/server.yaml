@@ -23,7 +23,6 @@ jobs:
  
       - name: "Compilacion"
         run: ./mvnw clean install
- 
       - name: "Verificar paquete"
         run: ls -ltra target
  
