@@ -54,3 +54,8 @@ jobs:
           terraform validate 
           terraform plan -out tfplan
           terraform apply tfplan
+      
+      - name: "Ejecutar Ansible"
+        run: |
+          cd ansibleAws
+          ansible-playbook -i inventario server.yml --become
