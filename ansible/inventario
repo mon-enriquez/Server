@@ -1,0 +1,6 @@
+[aws]
+52.14.76.103
+
+[all:vars]
+ansible_user=ubuntu
+ansible_ssh_private_key_file=Montse.pem

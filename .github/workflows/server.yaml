@@ -46,3 +46,9 @@ jobs:
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/n3j7o1e0
           docker tag webgoat/test:latest public.ecr.aws/n3j7o1e0/montse_server:latest
           docker push public.ecr.aws/n3j7o1e0/montse_server:latest
+      
+      - name: Aprovechamiento terraform
+        run: |
+          terraform init
+          terraform validate
+          terraform apply
