@@ -47,8 +47,11 @@ jobs:
           docker tag webgoat/test:latest public.ecr.aws/n3j7o1e0/montse_server:latest
           docker push public.ecr.aws/n3j7o1e0/montse_server:latest
       
-      - name: Aprovechamiento terraform
+      - name: "Aprovisionamiento terraform"
         run: |
+          cd terraform
           terraform init
-          terraform validate
+          terraform validate 
+          terraform plan
           terraform apply
+          terraform destroy
