@@ -1,4 +1,4 @@
-name: labsNov2023
+name: Server 
  
 on:
   push:
