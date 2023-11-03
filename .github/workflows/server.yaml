@@ -57,7 +57,7 @@ jobs:
           ip_webgoat=$(cat results_tfplan.txt | grep "My_ip = " | awk '{ print $3}' | sed 's/"//g')
           sed -i "s/IP/$ip_webgoat/g" ../ansible/inventario
 
-     - name: "Ansible"
+      - name: "Ansible"
         env:
           PRIVATE_KEY: ${{ secrets.MONTSE_PEM }}
         run: |
