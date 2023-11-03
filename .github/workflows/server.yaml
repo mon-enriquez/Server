@@ -28,7 +28,19 @@ jobs:
         run: ls -ltra target
 
       - name: Contenedor Docker
-        run:
+        run: |
           docker build -t prueba .
           docker images
           docker run --name webgoat -d -p 127.0.0.1:8080:8080 -p 127.0.0.1:9090:9090 prueba
+      
+      - name: "Imagen Docker"
+        run: |
+          docker build -f Dockerfile . -t webgoat/test
+          docker images
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with: 
+          aws-access-key-id: ${{ secrets.MONTSE_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.MONTSE_SECRET_KEY }}
+          aws-region: ${{ secrets.us-east-2 }}
