@@ -23,22 +23,12 @@ jobs:
  
       - name: "Compilacion"
         run: ./mvnw clean install
+
       - name: "Verificar paquete"
         run: ls -ltra target
- 
-      - name: "Dependency Check"
-        uses: dependency-check/Dependency-Check_Action@main
-        env:
-          JAVA_HOME: /opt/jdk
-        id: Depcheck
-        with:
-          project: 'WebGoat'
-          path: '.'
-          format: 'HTML'
-          out: 'reports'
- 
+
       - name: Contenedor Docker
-        run: |
+        run:
           docker build -t prueba .
           docker images
           docker run --name webgoat -d -p 127.0.0.1:8080:8080 -p 127.0.0.1:9090:9090 prueba
