@@ -29,11 +29,10 @@ jobs:
       - name: "Verificar paquete"
         run: ls -ltra target
  
-      - name: "Generación de imagen de docker"
+      - name: "Imagen Docker"
         run: |
-          IMAGE_NAME="docker.io/my-organization/my-app:${{ github.sha }}"
-          docker build -f Dockerfile -t $IMAGE_NAME .
-          echo "Image Reference: $IMAGE_NAME"
+          docker build -f Dockerfile . -t webgoat/test
+          docker images
  
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -45,5 +44,5 @@ jobs:
       - name: Cargar imagen ECR
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/n3j7o1e0
-          docker tag $IMAGE_NAME:latest public.ecr.aws/n3j7o1e0/montse_server:latest
+          docker tag webgoat/test:latest public.ecr.aws/n3j7o1e0/montse_server:latest
           docker push public.ecr.aws/n3j7o1e0/montse_server:latest
