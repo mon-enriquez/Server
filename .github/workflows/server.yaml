@@ -59,7 +59,7 @@ jobs:
         
      - name: "Ansible"
         env:
-          PRIVATE_KEY: ${{ secrets.MONTSE_PEM }}
+          PRIVATE_KEY: ${{ secrets.Montse.pem }}
         run: |
           sudo apt update
           sudo apt install -y ansible
