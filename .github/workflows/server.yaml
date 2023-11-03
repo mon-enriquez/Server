@@ -63,7 +63,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y ansible
-          cd /Server/
+          cd terraform
           echo "$PRIVATE_KEY" >> $HOME/key.pem
           sudo chmod 600 $HOME/key.pem
           export ANSIBLE_HOST_KEY_CHECKING=False
@@ -72,6 +72,6 @@ jobs:
         
       - name: "Destruir infraestructura"
         run: |
-          cd /Server/
+          cd terraform
           terraform plan -destroy -out tfplan
           terraform apply tfplan
