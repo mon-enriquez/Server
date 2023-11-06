@@ -95,11 +95,11 @@ jobs:
           terraform plan -out tfplan
           terraform apply tfplan >> results_tfplan.txt
           ip_webgoat=$(cat results_tfplan.txt | grep "My_ip = " | awk '{ print $3 }' | sed 's/"//g')
-          sed -i "s/IP/$ip_webgoat/g" ../Ansible/inventario
+          sed -i "s/IP/$ip_webgoat/g" ../ansible/inventario
           
       - name: "Ansible"
         env:
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY: ${{ secrets.MONTSE_PEM }}
         run: |
           sudo apt update
           sudo apt install -y ansible
