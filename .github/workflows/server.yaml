@@ -46,6 +46,15 @@ jobs:
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/n3j7o1e0
           docker tag webgoat/test:latest public.ecr.aws/n3j7o1e0/montse_server:latest
           docker push public.ecr.aws/n3j7o1e0/montse_server:latest
+          
+      - name: "Checkov"
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          output_format: cli,sarif
+          output_file_path: console, results.sarif
+          directory: terraform
+          framework: terraform
+          soft_fail: true
 
       - name: "Aprovisionamiento terraform"
         run: |
@@ -56,15 +65,6 @@ jobs:
           terraform apply tfplan >> results_tfplan.txt
           ip_webgoat=$(cat results_tfplan.txt | grep "My_ip = " | awk '{ print $3}' | sed 's/"//g')
           sed -i "s/IP/$ip_webgoat/g" ../ansible/inventario
-      
-      - name: "Checkov"
-        uses: bridgecrewio/checkov-action@v12
-        with:
-          output_format: cli,sarif
-          output_file_path: console, results.sarif
-          directory: terraform
-          framework: terraform
-          soft_fail: true
 
       - name: "Ansible"
         env:
