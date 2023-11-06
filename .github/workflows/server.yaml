@@ -56,11 +56,6 @@ jobs:
           framework: terraform
           soft_fail: true
 
-      - name: "Reportes"  
-        uses: github/codeql-action/upload-sarif@v1  
-        with:    
-          sarif_file: ${{ steps.codeql.outputs.sarif_file }}
-
       - name: "Aprovisionamiento terraform"
         run: |
           cd terraform
