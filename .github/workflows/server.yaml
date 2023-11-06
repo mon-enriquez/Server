@@ -59,8 +59,10 @@ jobs:
       
       - name: "Checkov"
         run: |
+          cd terraform
           pip3 install checkov
-          checkov -f tfplan
+          terraform plan -out tfplan | jq >> tfplan.json
+          checkov -f tfplan.json
 
       - name: "Ansible"
         env:
