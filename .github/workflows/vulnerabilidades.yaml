@@ -82,8 +82,8 @@ jobs:
       - name: "Scan Infra: Checkov"
         uses: bridgecrewio/checkov-action@v12
         with:
-          output_format: cli,sarif
-          output_file_path: console,results.sarif
+          output_format: cli,Sarif
+          output_file_path: console,results.Sarif
           directory: terraform
           framework: terraform
           soft_fail: true
