@@ -55,7 +55,7 @@ jobs:
       - name: "Generación de imagen de docker"
         run: |
           docker build -f Dockerfile . -t webgoat/test
-          docker tag webgoat/test:latest public.ecr.aws/w2x5h8r5/demo1:latest
+          docker tag webgoat/test:latest public.ecr.aws/w2x5h8r5/montse-ec2:latest
           docker images
       
       - name: "Run Trivy vulnerability scanner"
@@ -71,13 +71,13 @@ jobs:
       - name: "Configuración de credenciales en AWS"
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.ARN }}
+          role-to-assume: ${{ secrets.MONTSE_PEM }}
           aws-region: us-east-2
 
       - name: "Subir imagen a ECR publico"
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/w2x5h8r5
-          docker push public.ecr.aws/w2x5h8r5/demo1:latest
+          docker push public.ecr.aws/w2x5h8r5/montse-ec2:latest
             
       - name: "Scan Infra: Checkov"
         uses: bridgecrewio/checkov-action@v12
