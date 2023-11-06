@@ -55,7 +55,7 @@ jobs:
       - name: "Generación de imagen de docker"
         run: |
           docker build -f Dockerfile . -t webgoat/test
-          docker tag webgoat/test:latest public.ecr.aws/w2x5h8r5/Montse_DevSecOps:latest
+          docker tag webgoat/test:latest public.ecr.aws/w2x5h8r5/Montse ec2:latest
           docker images
       
       - name: "Run Trivy vulnerability scanner"
@@ -77,16 +77,7 @@ jobs:
       - name: "Subir imagen a ECR publico"
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/w2x5h8r5
-          docker push public.ecr.aws/w2x5h8r5/Montse_DEvSecOps:latest
-            
-      - name: "Scan Infra: Checkov"
-        uses: bridgecrewio/checkov-action@v12
-        with:
-          output_format: cli,Sarif
-          output_file_path: console,results.Sarif
-          directory: terraform
-          framework: terraform
-          soft_fail: true
+          docker push public.ecr.aws/w2x5h8r5/Montse ec2:latest
 
       - name: "Aprovisianamiento con terraform"
         run: |
