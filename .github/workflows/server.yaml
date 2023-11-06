@@ -70,7 +70,7 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.MONTSE_PEM }}
         run: |
-          sudo apt update
+          sudo apt update 
           sudo apt install -y ansible
           cd terraform
           echo "$PRIVATE_KEY" >> $HOME/key.pem
