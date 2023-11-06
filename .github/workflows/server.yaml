@@ -24,7 +24,7 @@ jobs:
           java-version: "17"
 
       - name: "Compilacion"
-        run: ./mvnw clean install
+        run: ./mvnw clean install 
 
       - name: "Verificar paquete"
         run: ls -ltra target
