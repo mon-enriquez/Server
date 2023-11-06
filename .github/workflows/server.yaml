@@ -59,7 +59,7 @@ jobs:
       
       - name: "Checkov"
         run: |
-          sudo pip3 install checkov
+          pip3 install checkov
           checkov -f tfplan
 
       - name: "Ansible"
