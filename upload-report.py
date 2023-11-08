@@ -1,13 +1,17 @@
 import requests
 import json
 import argparse
- 
+import os
+import base64
+
+MY_SECRET = os.environ["my_secret"] 
  
 # with open('reporteT.json', 'r') as report_file:
 #     trivy_report = json.load(report_file)
  
 url_api = "http://18.218.244.166:8080/api/v2/{method}"
-api_key = "Token edaf1740e048924e2f817fb6436a803b690c6900"
+api_key_encoded = base64.b16encode(f"{MY_SECRET}".encode("ascii"))
+api_key = f"Basic {api_key_encoded.decode('ascii')}"
  
 # def get_products():
 #     headers = {

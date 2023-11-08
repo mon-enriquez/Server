@@ -1,5 +1,8 @@
 name: GOAT Compile
 
+env:
+  my_secret: ${{ secrets.MONTSE_SECRET }}
+
 on: 
   push:
       branches:
