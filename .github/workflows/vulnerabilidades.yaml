@@ -1,35 +1,54 @@
 name: GOAT Compile
- 
-on:
+
+on: 
   push:
-    branches:
-      - main
- 
+      branches:
+       - main
+
 jobs:
-  integration:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
- 
     steps:
-      - name: "Obteniendo ultima version del codigo"
+      - name: "Obteniendo ultima versio del codigo"
         uses: actions/checkout@v3
- 
-      - name: "Instalacion Java"
+
+      - name: "Instalacion de Java"
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
           java-version: "17"
- 
-      - name: "Compilacion"
+
+      - name: "Compilacion"    
         run: ./mvnw clean install
- 
+
       - name: "Verificar paquete"
         run: ls -ltra target
 
-      - name: "Dependency Check"
+  sca:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: "Obteniendo version"
+        uses: actions/checkout@v2
+
+      - name: "Instalacion de Java"
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: "Instalar python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      - name: "Actualizar dep de python"
+        run: |
+              pip3 install requests
+              
+      - name: "Compilacion 2"
+        run: ./mvnw clean install
+
+      - name: "Dependency-check"
         uses: dependency-check/Dependency-Check_Action@main
         env:
           JAVA_HOME: /opt/jdk
@@ -38,68 +57,85 @@ jobs:
           project: 'WebGoat'
           path: '.'
           format: 'XML'
-          out: 'reports'
- 
-      - name: "Subir XML"
-        uses: github/codeql-action/upload-sarif@v2        
-        with:          # Path to SARIF file relative to the root of the repository          
-          sarif_file: ${{github.workspace}}/reports
-          checkout_path: ${{github.workspace}}/reports
+          out: 'reportsDC' # this is the default, no need to specify unless you wish to override it
+
+      #- name: "Subir SARIF"
+       # uses: github/codeql-action/upload-sarif@v2        
+        #with:          # Path to SARIF file relative to the root of the repository          
+         # sarif_file: ${{github.workspace}}/reportsDC
+          #checkout_path: ${{github.workspace}}/reportsDC
 
       - name: "Verificar reporte"
-        run: ls -ltra reports
- 
-      - name: "Instalando Horusec"
+        run: ls -ltra reportsDC
+
+      - name: "Subir Dep-Check scan a DefectDojo"
         run: |
-          curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/main/deployments/scripts/install.sh | bash -s latest-beta
- 
-      - name: "Horusec -SAST"
-        run: horusec start -p="./"
- 
-      - name: "Imagen Docker"
-        run: |
-          docker build -f Dockerfile . -t webgoat/test
-          docker images
- 
-      - name: "Run Trivy vulnerability scanner"
+              python3 upload-report.py --file reportsDC/dependency-check-report.xml --type-scan 'Dependency Check Scan'
+
+      - name: "Crear imagen de Docker"
+        run: docker build -t webgoat ./
+
+      - name: "Verificar imagen"
+        run: docker images 
+
+      - name: "Ejecutar trivy"
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'webgoat/test'
-          timeout: 10m0s
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
-          scanners: vuln,secret,config
+          image-ref: 'webgoat'
           format: 'json'
           output: 'trivy-results.json'
-        continue-on-error: true
-         
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-json@v2
-        with:
-          sarif_file: 'trivy-results.json'
-          category: 'code'
- 
-      - name: "Contenedor"
-        run: docker run -d -p 8080:80 --name cod webgoat/test
-    
-      - name: "Listado"
+          ignore-unfixed: false
+          timeout: 15m0s
+
+      - name: "Subir Trivy scan a DefectDojo"
+        run: |
+              python3 upload-report.py --file trivy-results.json --type-scan 'Trivy Scan' 
+
+      #- name: "Subir reporte de trivi a scan"
+       # uses: github/codeql-action/upload-sarif@v2
+        #with:
+         # sarif_file: 'trivy-results.sarif'
+          #category: 'code'
+
+      - name: "Crear contenedor"
+        run: docker run -d -p 8080:8080 --name container-prueba webgoat
+
+      - name: "Verificar contenedor"
         run: docker ps -a
- 
-      - name: "Iniciar"
-        run: docker container start cod
- 
-      - name: "Installing Arachni"
+
+      - name: "Descargar arachni"
         run: |
-          wget https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz
-          tar -xvf arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz
+              wget https://github.com/Arachni/arachni/releases/download/v1.6.1.3/arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz
+              tar -xvf arachni-1.6.1.3-0.6.1.1-linux-x86_64.tar.gz
+      
+      #- name: "Encontrar IP del contenedor"
+        #run: docker inspect container-prueba
  
-      - name: "Finding IP"
-        run: var_IP=$(docker inspect webgoat/test | grep "IPAddress" | tail -1 | cut -d ',' -f 4)
- 
-      - name: "Executing Arachni"
-        run: ./arachni-1.6.1.3-0.6.1.1/bin/arachni --check=* http://$var_IP:8080/WebGoat/login
- 
-      - name: "Crear Contenedor"
+      - name: "Ejecutar arachni"
         run: |
-          docker container stop cod
-          docker container rm cod
+              var_IP=$(docker inspect container-prueba | grep "IPAddress" | tail -1 | cut -d '"' -f 4)
+              ./arachni-1.6.1.3-0.6.1.1/bin/arachni --check=* http://$var_IP:8080/WebGoat/login
+
+
+
+  horusec:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Obteniendo ultima versio del codigo"
+        uses: actions/checkout@v3
+
+      - name: "Instalacion de Java"
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      #- name: "Instalar horusec"
+      #  run: curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/main/deployments/scripts/install.sh | bash -s latest-beta
+
+      - name: "Ejecucion de horusec"
+        id: run_horusec
+        uses: fike/horusec-action@main
+        with:
+          arguments: -p="./" --return-error -e="false"
+        #run: horusec start -p="./" --return-error -e="false"
